@@ -47,18 +47,18 @@ bool operator==(const Point<N>& one, const Point<N>& two);
 template <std::size_t N>
 bool operator!=(const Point<N>& one, const Point<N>& two);
 
-template <size_t N>
-size_t Point<N>::size() const {
+template <std::size_t N>
+std::size_t Point<N>::size() const {
     return N;
 }
 
 template <std::size_t N>
-double& Point<N>::operator[] (size_t index) {
+double& Point<N>::operator[] (std::size_t index) {
     return coords[index];
 }
 
 template <std::size_t N>
-double Point<N>::operator[] (size_t index) const {
+double Point<N>::operator[] (std::size_t index) const {
     return coords[index];
 }
 
@@ -85,7 +85,7 @@ typename Point<N>::const_iterator Point<N>::end() const {
 template <std::size_t N>
 double Distance(const Point<N>& one, const Point<N>& two) {
     double result = 0.0;
-    for (size_t i = 0; i < N; ++i)
+    for (std::size_t i = 0; i < N; ++i)
         result += (one[i] - two[i]) * (one[i] - two[i]);
     return result;
 }

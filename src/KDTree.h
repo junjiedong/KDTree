@@ -87,7 +87,7 @@ private:
     Node* root_;
 
     // Number of points in the KD-Tree
-    size_t size_;
+    std::size_t size_;
 
     /*
      * Recursively build a subtree that satisfies the KD-Tree invariant using points in [start, end)
@@ -136,20 +136,22 @@ typename KDTree<N, ElemType>::Node* KDTree<N, ElemType>::buildTree(typename std:
                                                                    typename std::vector<std::pair<Point<N>, ElemType>>::iterator end, int currLevel) {
     if (start >= end) return NULL; // empty tree
 
-    size_t len = end - start;
-    auto mid = start + len / 2;
     int axis = currLevel % N; // the axis to split on
-    auto cmp = [axis](const std::pair<Point<N>, ElemType>& p1, const std::pair<Point<N>, ElemType>& p2) { return p1.first[axis] < p2.first[axis]; };
-    nth_element(start, mid, end, cmp);
+    auto cmp = [axis](const std::pair<Point<N>, ElemType>& p1, const std::pair<Point<N>, ElemType>& p2) {
+        return p1.first[axis] < p2.first[axis];
+    };
+    std::size_t len = end - start;
+    auto mid = start + len / 2;
+    std::nth_element(start, mid, end, cmp); // linear time partition
 
-    // move 'mid' left (if needed) so that all the equal points are to the right
-    // The tree will still be balanced as long as there aren't many points that are equal
-    while (mid > start && (mid - 1)->first == mid->first) {
+    // move left (if needed) so that all the equal points are to the right
+    // The tree will still be balanced as long as there aren't many points that are equal along each axis
+    while (mid > start && (mid - 1)->first[axis] == mid->first[axis]) {
         --mid;
     }
 
     Node* newNode = new Node(mid->first, currLevel, mid->second);
-    newNode->left = buildTree(start, mid - 1, currLevel + 1);
+    newNode->left = buildTree(start, mid, currLevel + 1);
     newNode->right = buildTree(mid + 1, end, currLevel + 1);
     return newNode;
 }
@@ -190,12 +192,12 @@ KDTree<N, ElemType>::~KDTree() {
 }
 
 template <std::size_t N, typename ElemType>
-size_t KDTree<N, ElemType>::dimension() const {
+std::size_t KDTree<N, ElemType>::dimension() const {
     return N;
 }
 
 template <std::size_t N, typename ElemType>
-size_t KDTree<N, ElemType>::size() const {
+std::size_t KDTree<N, ElemType>::size() const {
     return size_;
 }
 
@@ -300,7 +302,7 @@ void KDTree<N, ElemType>::nearestNeighborRecurse(const typename KDTree<N, ElemTy
 }
 
 template <std::size_t N, typename ElemType>
-ElemType KDTree<N, ElemType>::kNNValue(const Point<N>& key, size_t k) const {
+ElemType KDTree<N, ElemType>::kNNValue(const Point<N>& key, std::size_t k) const {
     BoundedPQueue<ElemType> pQueue(k); // BPQ with maximum size k
     if (empty()) return ElemType(); // default return value if KD-tree is empty
 
